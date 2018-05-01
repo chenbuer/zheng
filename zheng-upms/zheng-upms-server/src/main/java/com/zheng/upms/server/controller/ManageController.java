@@ -35,6 +35,11 @@ public class ManageController extends BaseController {
 	@Autowired
 	private UpmsApiService upmsApiService;
 
+	/**
+	 * 已经登录之后进入后台的index页面
+	 * @param modelMap
+	 * @return
+	 */
 	@ApiOperation(value = "后台首页")
 	@RequestMapping(value = "/index", method = RequestMethod.GET)
 	public String index(ModelMap modelMap) {

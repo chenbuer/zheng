@@ -55,6 +55,7 @@
         <!-- 全局session超时时间 -->
         <property name="globalSessionTimeout" value="${zheng.upms.session.timeout}"/>
         <!-- sessionDAO -->
+        <property name="sessionValidationInterval" value="1800000"/><!--隔多久检查一次session的有效性-->
         <property name="sessionDAO" ref="sessionDAO"/>
         <property name="sessionIdCookieEnabled" value="true"/>
         <property name="sessionIdCookie" ref="sessionIdCookie"/>
@@ -66,7 +67,11 @@
     </bean>
 
     <!-- 会话DAO，可重写，持久化session -->
-    <bean id="sessionDAO" class="com.zheng.upms.client.shiro.session.UpmsSessionDao"/>
+    <bean id="sessionDAO" class="com.zheng.upms.client.shiro.session.UpmsSessionDao">
+        <property name="sessionIdGenerator" value="sessionIdGenerator"/>
+    </bean>
+
+    <bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"/>
 
     <!-- 会话Cookie模板 -->
     <bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">

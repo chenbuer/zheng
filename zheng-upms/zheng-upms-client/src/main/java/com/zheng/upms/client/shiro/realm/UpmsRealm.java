@@ -33,6 +33,9 @@ public class UpmsRealm extends AuthorizingRealm {
 
     /**
      * 授权：验证权限时调用
+     * czy:分别获取到该用户所属的role的List && 该用户所拥有Permission
+     *
+     *
      * @param principalCollection
      * @return
      */
@@ -73,24 +76,34 @@ public class UpmsRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        String username = (String) authenticationToken.getPrincipal();
-        String password = new String((char[]) authenticationToken.getCredentials());
+//        String username = (String) authenticationToken.getPrincipal();
+//        String password = new String((char[]) authenticationToken.getCredentials());
+
+        UsernamePasswordToken token = (UsernamePasswordToken) authenticationToken;
+        String username = token.getUsername();
+//        char[] password = token.getPassword();
+        String password = new String(token.getPassword());
+
         // client无密认证
+        // 终端类型，是server需要认证，是client的不需要认证。不过我们的都是配置的server
         String upmsType = PropertiesFileUtil.getInstance("zheng-upms-client").get("zheng.upms.type");
         if ("client".equals(upmsType)) {
             return new SimpleAuthenticationInfo(username, password, getName());
         }
 
+        // 此处是server时，需要进行用户验证的情况
         // 查询用户信息
         UpmsUser upmsUser = upmsApiService.selectUpmsUserByUsername(username);
 
         if (null == upmsUser) {
             throw new UnknownAccountException();
         }
+        // czy：注意此处的每个用户的加密盐是放在用户表中的
         if (!upmsUser.getPassword().equals(MD5Util.md5(password + upmsUser.getSalt()))) {
             throw new IncorrectCredentialsException();
         }
         if (upmsUser.getLocked() == 1) {
+            // czy:用户被锁定，用用户表中的Locked字段表示
             throw new LockedAccountException();
         }
 

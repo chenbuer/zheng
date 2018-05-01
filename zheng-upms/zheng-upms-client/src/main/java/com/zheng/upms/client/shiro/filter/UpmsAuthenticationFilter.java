@@ -70,14 +70,15 @@ public class UpmsAuthenticationFilter extends AuthenticationFilter {
 
     @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
-        StringBuffer ssoServerUrl = new StringBuffer(PropertiesFileUtil.getInstance("zheng-upms-client").get("zheng.upms.sso.server.url"));
+        PropertiesFileUtil propertiesFileUtil = PropertiesFileUtil.getInstance("zheng-upms-client");
+        StringBuffer ssoServerUrl = new StringBuffer(propertiesFileUtil.get("zheng.upms.sso.server.url"));
         // server需要登录
-        String upmsType = PropertiesFileUtil.getInstance("zheng-upms-client").get("zheng.upms.type");
+        String upmsType = propertiesFileUtil.get("zheng.upms.type");
         if ("server".equals(upmsType)) {
             WebUtils.toHttp(response).sendRedirect(ssoServerUrl.append("/sso/login").toString());
             return false;
         }
-        ssoServerUrl.append("/sso/index").append("?").append("appid").append("=").append(PropertiesFileUtil.getInstance("zheng-upms-client").get("zheng.upms.appID"));
+        ssoServerUrl.append("/sso/index").append("?").append("appid").append("=").append(propertiesFileUtil.get("zheng.upms.appID"));
         // 回跳地址
         HttpServletRequest httpServletRequest = WebUtils.toHttp(request);
         StringBuffer backurl = httpServletRequest.getRequestURL();

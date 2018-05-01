@@ -34,6 +34,11 @@ public class UpmsSessionDao extends CachingSessionDAO {
     // 单点同一个code所有局部会话key
     private final static String ZHENG_UPMS_CLIENT_SESSION_IDS = "zheng-upms-client-session-ids";
 
+    /**
+     * 创建session
+     * @param session
+     * @return
+     */
     @Override
     protected Serializable doCreate(Session session) {
         Serializable sessionId = generateSessionId(session);
@@ -43,6 +48,11 @@ public class UpmsSessionDao extends CachingSessionDAO {
         return sessionId;
     }
 
+    /**
+     * 获取session
+     * @param sessionId
+     * @return
+     */
     @Override
     protected Session doReadSession(Serializable sessionId) {
         String session = RedisUtil.get(ZHENG_UPMS_SHIRO_SESSION_ID + "_" + sessionId);

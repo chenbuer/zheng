@@ -139,7 +139,7 @@ public class RedisUtil {
 	 * 设置 String 过期时间
 	 * @param key
 	 * @param value
-	 * @param seconds 以秒为单位
+	 * @param seconds 以秒为单位  czy:超时时间？
 	 */
 	public synchronized static void set(String key, String value, int seconds) {
 		try {
