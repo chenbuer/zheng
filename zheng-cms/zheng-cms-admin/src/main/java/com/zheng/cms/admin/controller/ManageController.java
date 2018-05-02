@@ -27,6 +27,7 @@ public class ManageController extends BaseController {
 	@ApiOperation(value = "后台首页")
 	@RequestMapping(value = "/index", method = RequestMethod.GET)
 	public String index() {
+		System.out.println("稍微停顿");//未登录的情况下，压根走不到这儿
 		return "/manage/index.jsp";
 	}
 
