@@ -68,7 +68,7 @@
 
     <!-- 会话DAO，可重写，持久化session -->
     <bean id="sessionDAO" class="com.zheng.upms.client.shiro.session.UpmsSessionDao">
-        <property name="sessionIdGenerator" value="sessionIdGenerator"/>
+        <property name="sessionIdGenerator" ref="sessionIdGenerator"/>
     </bean>
 
     <bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"/>
