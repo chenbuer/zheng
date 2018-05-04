@@ -87,12 +87,12 @@ public class UpmsAuthenticationFilter extends AuthenticationFilter {
             backurl.append("?").append(queryString);
         }
         ssoServerUrl.append("&").append("backurl").append("=").append(URLEncoder.encode(backurl.toString(), "utf-8"));
-        WebUtils.toHttp(response).sendRedirect(ssoServerUrl.toString());
+        WebUtils.toHttp(response).sendRedirect(ssoServerUrl.toString());// czy:在这一步将请求redirect到ssoServerUrl，继续
         return false;
     }
 
     /**
-     * 认证中心登录成功带回code
+     * 认证中心登录成功带回code   czy:此处的code应该立即为token
      * @param request
      */
     private boolean validateClient(ServletRequest request, ServletResponse response) {
@@ -100,7 +100,7 @@ public class UpmsAuthenticationFilter extends AuthenticationFilter {
         Session session = subject.getSession();
         String sessionId = session.getId().toString();
         int timeOut = (int) session.getTimeout() / 1000;
-        // 判断局部会话是否登录
+        // 判断局部会话是否登录，czy:第一次登陆的时候，CacheClientSession的值为null
         String cacheClientSession = RedisUtil.get(ZHENG_UPMS_CLIENT_SESSION_ID + "_" + session.getId());
         if (StringUtils.isNotBlank(cacheClientSession)) {
             // 更新code有效期
@@ -121,7 +121,7 @@ public class UpmsAuthenticationFilter extends AuthenticationFilter {
                 return true;
             }
         }
-        // 判断是否有认证中心code
+        // 判断是否有认证中心code  czy:upms_code为空。todo: 此处的code是什么意思？？？
         String code = request.getParameter("upms_code");
         // 已拿到code
         if (StringUtils.isNotBlank(code)) {
