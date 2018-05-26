@@ -14,7 +14,7 @@
         <property name="securityManager" ref="securityManager"/>
         <property name="loginUrl" value="${zheng.upms.sso.server.url}"/>
         <property name="successUrl" value="${zheng.upms.successUrl}"/>
-        <property name="unauthorizedUrl" value="${zheng.upms.unauthorizedUrl}"/>
+        <property name="unauthorizedUrl" value="${zheng.upms.unauthorizedUrl}"/><!--未授权地址-->
         <property name="filters">
             <util:map>
                 <entry key="authc" value-ref="upmsAuthenticationFilter"/>
@@ -48,7 +48,7 @@
     </bean>
 
     <!-- realm实现，继承自AuthorizingRealm -->
-    <bean id="upmsRealm" class="com.zheng.upms.client.shiro.realm.UpmsRealm"></bean>
+    <bean id="upmsRealm" class="com.zheng.upms.client.shiro.realm.UpmsRealm">F</bean>
 
     <!-- 会话管理器 -->
     <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">

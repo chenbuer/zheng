@@ -7,17 +7,18 @@
 
     <!-- 连接工厂 -->
     <bean id="activeMqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="${AvtiveMQ.brokerURL}"/>
+        <property name="brokerURL" value="${AvtiveMQ.brokerURL}"/><!--czy:activemq的服务器地址-->
         <property name="useAsyncSend" value="true"/>
     </bean>
+    <!--czy:spring jms提供的mq链接工厂-->
     <bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
-        <property name="targetConnectionFactory" ref="activeMqConnectionFactory"/>
+        <property name="targetConnectionFactory" ref="activeMqConnectionFactory"/><!--czy:目标的链接工厂，是activemq的链接工厂-->
         <property name="sessionCacheSize" value="100"/>
     </bean>
 
     <!-- 点对点队列 -->
-    <bean id="defaultQueueDestination" class="org.apache.activemq.command.ActiveMQQueue">
-        <constructor-arg index="0" value="com.zheng.cms.admin.queue.default"/>
+    <bean id="defaultQueueDestination" class="org.apache.activemq.command.ActiveMQQueue"><!--czy目的地-->
+        <constructor-arg index="0" value="com.zheng.cms.admin.queue.default"/><!--czy:这个值就是mq队列的名字-->
     </bean>
     <!-- 一对多队列 -->
     <bean id="defaultTopicDestination" class="org.apache.activemq.command.ActiveMQTopic">

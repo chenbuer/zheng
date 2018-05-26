@@ -50,7 +50,7 @@ public class SSOController extends BaseController {
     private final static String ZHENG_UPMS_SERVER_SESSION_ID = "zheng-upms-server-session-id";
     // 全局会话key列表
     private final static String ZHENG_UPMS_SERVER_SESSION_IDS = "zheng-upms-server-session-ids";
-    // code key
+    // code key     czy:他的key是这个常亮_code, value也是code。它的作用是为了验证code(token)使用
     private final static String ZHENG_UPMS_SERVER_CODE = "zheng-upms-server-code";
 
     @Autowired
@@ -156,7 +156,7 @@ public class SSOController extends BaseController {
             // code校验值
             RedisUtil.set(ZHENG_UPMS_SERVER_CODE + "_" + code, code, (int) subject.getSession().getTimeout() / 1000);
         }
-        // 回跳登录前地址
+        // 回跳登录前地址，backUrl="http://localhost:2222/manage/index;JSESSIONID=03eb4a59-62d1-4657-a1fe-7e688f1fb9fd"  这里面的JESSIONID是客户端的sessionId
         String backurl = request.getParameter("backurl");
         if (StringUtils.isBlank(backurl)) {
             UpmsSystem upmsSystem = upmsSystemService.selectUpmsSystemByName(PropertiesFileUtil.getInstance().get("app.name"));

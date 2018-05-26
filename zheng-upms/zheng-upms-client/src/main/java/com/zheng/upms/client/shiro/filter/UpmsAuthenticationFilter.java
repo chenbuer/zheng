@@ -1,11 +1,13 @@
 package com.zheng.upms.client.shiro.filter;
 
 import com.alibaba.fastjson.JSONObject;
+import com.zheng.common.base.BaseResult;
 import com.zheng.common.util.PropertiesFileUtil;
 import com.zheng.common.util.RedisUtil;
 import com.zheng.upms.client.shiro.session.UpmsSessionDao;
 import com.zheng.upms.client.util.RequestParameterUtil;
 import com.zheng.upms.common.constant.UpmsConstant;
+import com.zheng.upms.common.constant.UpmsResultConstant;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -100,13 +102,13 @@ public class UpmsAuthenticationFilter extends AuthenticationFilter {
         Session session = subject.getSession();
         String sessionId = session.getId().toString();
         int timeOut = (int) session.getTimeout() / 1000;
-        // 判断局部会话是否登录，czy:第一次登陆的时候，CacheClientSession的值为null
+        // 判断局部会话是否登录，czy:要是登录成功，在redis中就有这个key值；否则，该client未登录成功。另外：这个cacheClientSession要是不为空的话，就是code(token)值
         String cacheClientSession = RedisUtil.get(ZHENG_UPMS_CLIENT_SESSION_ID + "_" + session.getId());
         if (StringUtils.isNotBlank(cacheClientSession)) {
-            // 更新code有效期
+            // 更新code有效期。czy:重新登录就要跟新有效时间！！！
             RedisUtil.set(ZHENG_UPMS_CLIENT_SESSION_ID + "_" + sessionId, cacheClientSession, timeOut);
             Jedis jedis = RedisUtil.getJedis();
-            jedis.expire(ZHENG_UPMS_CLIENT_SESSION_IDS + "_" + cacheClientSession, timeOut);
+            jedis.expire(ZHENG_UPMS_CLIENT_SESSION_IDS + "_" + cacheClientSession, timeOut);//czy:将一个单点对应的key值也设置为同一个timeout，单位为分
             jedis.close();
             // 移除url中的code参数
             if (null != request.getParameter("code")) {
@@ -121,11 +123,11 @@ public class UpmsAuthenticationFilter extends AuthenticationFilter {
                 return true;
             }
         }
-        // 判断是否有认证中心code  czy:upms_code为空。todo: 此处的code是什么意思？？？
+        // 判断是否有认证中心code  czy:upms_code为空。todo: 此处的code是什么意思？？？就是token的意思
         String code = request.getParameter("upms_code");
         // 已拿到code
         if (StringUtils.isNotBlank(code)) {
-            // HttpPost去校验code
+            // HttpPost去校验code。czy:此时表示是client端在输入用户名密码之后回调回来的，带有code(token)
             try {
                 StringBuffer ssoServerUrl = new StringBuffer(PropertiesFileUtil.getInstance("zheng-upms-client").get("zheng.upms.sso.server.url"));
                 HttpClient httpclient = new DefaultHttpClient();
@@ -134,12 +136,13 @@ public class UpmsAuthenticationFilter extends AuthenticationFilter {
                 List<NameValuePair> nameValuePairs = new ArrayList<>();
                 nameValuePairs.add(new BasicNameValuePair("code", code));
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
+                // czy:这是一个同步的消息，会一直等到server端返回消息
                 HttpResponse httpResponse = httpclient.execute(httpPost);
                 if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     HttpEntity httpEntity = httpResponse.getEntity();
                     JSONObject result = JSONObject.parseObject(EntityUtils.toString(httpEntity));
-                    if (1 == result.getIntValue("code") && result.getString("data").equals(code)) {
+                    if (UpmsResultConstant.SUCCESS.code == result.getIntValue("code") &&
+                            result.getString("data").equals(code)) {
                         // code校验正确，创建局部会话
                         RedisUtil.set(ZHENG_UPMS_CLIENT_SESSION_ID + "_" + sessionId, code, timeOut);
                         // 保存code对应的局部会话sessionId，方便退出操作
@@ -150,6 +153,8 @@ public class UpmsAuthenticationFilter extends AuthenticationFilter {
                         // 返回请求资源
                         try {
                             // client无密认证
+                            // todo:czy:既然已经是无秘认证，为什么还要subject.login()????这种空密码不会抛异常吗??
+                            // todo:czy:不会！因为在UpmsRealm.doGetAuthenticationInfo中也对是不是client进行了判断
                             String username = request.getParameter("upms_username");
                             subject.login(new UsernamePasswordToken(username, ""));
                             HttpServletResponse httpServletResponse = WebUtils.toHttp(response);
